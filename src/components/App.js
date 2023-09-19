@@ -1,70 +1,55 @@
 import React, { useState, useEffect } from "react";
 import "./../styles/App.css";
-
+ 
+const API_KEY = "ba2d767c7354ee6337b93936ec909c9a";
+ 
 const App = () => {
-  const [cityName, setCityName] = useState("");
-  const [weather, setWeather] = useState({});
-
+  let [search, setSearch] = useState("");
+  let [data, setData] = useState("");
+ 
   useEffect(() => {
-    weatherInfo();
-  }, [cityName]);
-
-  const weatherInfo = () => {
-    if (cityName) {
-      fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=7c6752fa195f26616f7223b785694963`
-      )
-        .then((response) => {
-          response.json().then((data) => {
-            if (data.cod && data.cod !== "404") {
-              setWeather(data);
-              setCityName("");
-            }
-
-            console.log(weather);
-          });
-        })
-        .catch((err) => console.error(err));
+    let timer
+    if(timer){
+      clearTimeout(timer)
     }
-  };
-
-  console.log(cityName);
+    timer =setTimeout(() => {
+      console.log(search)
+      // Send Axios request here
+      fetch(`https://api.openweathermap.org/data/2.5/weather?q=${search}&appid=${API_KEY}`)
+      .then(res => (res.json()))
+      .then(res => {
+        console.log(res);
+        console.log(res.weather[0]);
+        setData(res);
+        setSearch("")
+      })
+      .catch((error) => {
+        console.log(error.message)
+      })
+    },1000)
+  }, [search])
+ 
   return (
     <div>
       {/* Do not remove the main div */}
-      <input
-        className="search"
-        type="text"
-        onChange={(e) => {
-          setCityName(e.target.value);
-        }}
-        placeholder="Enter a city"
-        value={cityName}
-      />
-      {weather ? (
-        <div className="weather">
-          <div className="name">{weather.name}</div>
-          {weather.main && (
-            <div className="temp">{weather.main.temp} &deg;F</div>
-          )}
-          <div className="description">
-            {weather.weather && weather.weather[0].description}
+      <div className="input-div">
+        <input
+          type="search"
+          className="search"
+          onChange={(e) => setSearch(e.target.value)}
+          value={search}
+        ></input>
+      </div>
+        {
+          data &&
+          <div className="weather">
+            <div>{data.name}</div>
+            <div>{data.main.temp}F</div>
+            <div>{data.weather[0].description}</div>
           </div>
-          <div className="icon">
-            {weather.weather && (
-              <img
-                src={
-                  "http://openweathermap.org/img/w/" +
-                  weather.weather[0].icon +
-                  ".png"
-                }
-              />
-            )}
-          </div>
-        </div>
-      ) : null}
+        }     
     </div>
   );
 };
-
+ 
 export default App;
